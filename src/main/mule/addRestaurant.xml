@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="addRestaurantFlow" doc:id="84b1d886-dbf0-4ca8-af91-3d473bf57701" >
+		<db:select doc:name="getRestaurantByName" doc:id="4ddb75ab-f8cd-4057-9d43-c22704382dd8" config-ref="Database_Config" target="isDuplicate" targetValue="#[sizeOf(payload) &gt; 0]">
+			<db:sql><![CDATA[SELECT * FROM restaurant WHERE name = :name]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	name: payload.name
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="4406bcc4-e180-4352-8885-fc642ed2c4a9">
+			<when expression="#[vars.isDuplicate]">
+				<raise-error doc:name="Raise error" doc:id="fe8301ab-e59f-44c7-ad45-ab4f33e9cb1f" type="APP:DUPLICATE_ENTRY" description="A restaurant with same name already exists" />
+			</when>
+			<otherwise>
+				<db:insert doc:name="addRestaurant" doc:id="c9891338-e0ac-4adb-9256-035eb840e016" config-ref="Database_Config" autoGenerateKeys="true" target="insertResponse">
+			<db:sql><![CDATA[INSERT INTO `swiggydb`.`restaurant`
+(`name`,`house_number`,`street`,`city`,`pincode`)
+VALUES(:name, :house_number, :street, :city, :pincode)
+]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	name: payload.name,
+	house_number: payload.address.houseNumber,
+	street: payload.address.street,
+	city: payload.address.city,
+	pincode: payload.address.pincode
+}]]]></db:input-parameters>
+					<db:auto-generated-keys-column-names >
+						<db:auto-generated-keys-column-name value="restaurant_id" />
+					</db:auto-generated-keys-column-names>
+		</db:insert>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="a084e9f1-a8d7-4abe-ac1c-9232a761290b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ++ {
+	restaurantId: vars.insertResponse.generatedKeys.GENERATED_KEY,
+	"links": [
+			{
+			"linkName": "menus",
+			"href": "/api/restaurants/" ++ vars.insertResponse.generatedKeys.GENERATED_KEY as String ++ "/menus"
+			}
+		]
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+"201"]]></ee:set-variable>
+				<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	location: "/restaurant/" ++ vars.insertResponse.generatedKeys.GENERATED_KEY as String
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+</mule>

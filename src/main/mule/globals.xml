@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="fddc0884-9a63-459f-b47a-59d673e8fc07" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="welcome" database="swiggydb" />
+	</db:config>
+	<configuration doc:name="Configuration" doc:id="c4a50be6-042d-44fb-a58a-a4e14de05ba9" defaultErrorHandler-ref="globalsError_Handler" />
+	<error-handler name="globalsError_Handler" doc:id="3a2a058f-78c6-4e91-9b83-294a5df788ac" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="51cd2145-fe6b-414c-a87f-d76f87e57450" type="APP:DUPLICATE_ENTRY">
+			<ee:transform doc:name="Transform Message" doc:id="e0ea7126-71d0-4ec1-be27-8ea14d1fd70d" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "status": "409",
+  "message": error.description
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+"409"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="251c4559-12c6-4e51-aab4-b075f98522be" >
+			<ee:transform doc:name="Transform Message" doc:id="d4fac584-38ef-4783-8ec8-012da5a55c14" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "status": "500",
+  "message": "There was some server side problem. Please try later"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+"500"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>
