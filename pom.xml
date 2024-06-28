@@ -13,8 +13,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<app.runtime>4.6.1</app.runtime>
+		<app.runtime>4.6.4</app.runtime>
 		<mule.maven.plugin.version>4.2.0</mule.maven.plugin.version>
+		<target>sivaserver</target>
 	</properties>
 
 	<build>
@@ -30,6 +31,26 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
+				
+					 <armDeployment>
+					      <muleVersion>${app.runtime}</muleVersion>
+					      <uri>https://anypoint.mulesoft.com</uri>
+					      <target>${target}</target>
+					      <targetType>server</targetType>
+					      <!-- <username>${username}</username>
+					      <password>${password}</password> -->
+					      <connectedAppClientId>15bd383e6172411298ede350058a4112</connectedAppClientId>
+					      <connectedAppClientSecret>559d3F758aC749419d42CeF21753De47</connectedAppClientSecret>
+					      <connectedAppGrantType>client_credentials</connectedAppGrantType>
+					      <environment>Sandbox</environment>
+					      <properties>
+					        <key>value</key>
+					        <key2>value2</key2>
+					        <key3>value3</key3>
+					      </properties>
+					    </armDeployment>
+				
+				
 					<classifier>mule-application</classifier>
 					<sharedLibraries>
 						<sharedLibrary>
