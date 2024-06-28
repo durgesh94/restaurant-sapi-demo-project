@@ -3,7 +3,7 @@
     <http:listener-config name="restuarant-demo-project-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="restuarant-demo-project-config" api="resource::3a142d07-696d-4cc9-aa14-d3b89d6fdc56:restuarant-demo-project:1.0.3:raml:zip:restuarant-demo-project.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="restuarant-demo-project-config" api="resource::3a142d07-696d-4cc9-aa14-d3b89d6fdc56:restuarant-demo-project:1.0.7:raml:zip:restuarant-demo-project.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="restuarant-demo-project-main">
         <http:listener config-ref="restuarant-demo-project-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -127,29 +127,79 @@ output application/json
         <flow-ref doc:name="addRestaurantFlow" doc:id="e7c6b757-229a-4b94-9876-8dba3263aa9e" name="addRestaurantFlow" />
     </flow>
     <flow name="get:\restaurants:restuarant-demo-project-config">
-        <ee:transform doc:name="Transform Message" doc:id="3f6d6f80-e00f-47fa-ba76-165f582a762a" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+        <ee:transform doc:name="Transform Message" doc:id="3f6d6f80-e00f-47fa-ba76-165f582a762a">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/java
 ---
 {
 }]]></ee:set-payload>
-			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="pageSize" ><![CDATA[%dw 2.0
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="pageSize"><![CDATA[%dw 2.0
 output application/java
 ---
 attributes.queryParams.pageSize]]></ee:set-variable>
-				<ee:set-variable variableName="page" ><![CDATA[%dw 2.0
+                <ee:set-variable variableName="page"><![CDATA[%dw 2.0
 output application/java
 ---
 attributes.queryParams.page]]></ee:set-variable>
-				<ee:set-variable variableName="name" ><![CDATA[%dw 2.0
+                <ee:set-variable variableName="name"><![CDATA[%dw 2.0
 output application/java
 ---
 attributes.queryParams.name]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-		<flow-ref doc:name="getRestaurantFlow" doc:id="3d41471d-49d0-4487-8bba-c002b0d0e816" name="getRestaurantFlow" />
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="getRestaurantFlow" doc:id="3d41471d-49d0-4487-8bba-c002b0d0e816" name="getRestaurantFlow" />
+    </flow>
+    <flow name="get:\restaurants\(restaurant_id):restuarant-demo-project-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="restaurant_id">attributes.uriParams.'restaurant_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="getrestaurantbyidFlows" doc:id="35859d49-cbd6-4cc5-9c5f-f31a7c8699d1" name="getrestaurantbyidFlow" />
+    </flow>
+    <flow name="put:\restaurants\(restaurant_id):application\json:restuarant-demo-project-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="restaurant_id">attributes.uriParams.'restaurant_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "200",
+  message: "Restaurant with id {id} is updated"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\restaurants\(restaurant_id):restuarant-demo-project-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="restaurant_id">attributes.uriParams.'restaurant_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="delete:\restaurants\(restaurant_id):restuarant-demo-project-config" />
+    </flow>
+    <flow name="get:\restaurants\(restaurant_id)\menus:restuarant-demo-project-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="restaurant_id">attributes.uriParams.'restaurant_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="getallmenusofarestaurant" doc:id="d42e0b45-62f1-4537-a9a7-748b5c9644e5" name="getallmenusofarestaurant"/>
+    </flow>
+    <flow name="post:\restaurants\(restaurant_id)\menus:application\json:restuarant-demo-project-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="restaurant_id">attributes.uriParams.'restaurant_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="AddNewMenu" doc:id="abbf5f9d-467e-4f92-a7d0-29dcc64cf87f" name="AddNewMenu"/>
     </flow>
 </mule>

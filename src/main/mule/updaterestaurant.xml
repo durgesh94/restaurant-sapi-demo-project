@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="updaterestaurantbyid" doc:id="35e0731c-2f9e-451c-b0cf-7608279ff143" >
+		<ee:transform doc:name="Transform Message" doc:id="b559bc8e-66a6-4b06-9d1b-68bf1825babb" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="originalPayload" ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="beb9eebe-94a0-470e-b5eb-e06f3677d326" config-ref="Database_Config" queryTimeoutUnit="MILLISECONDS" >
+			<db:sql ><![CDATA[select * from restaurant where restaurant_id = :id ]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.restaurantId as Number 
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="1cba6055-9fb1-4ba7-80da-7c296d4bbefd" >
+			<when expression="#[isEmpty(payload)]" >
+				<raise-error doc:name="Raise error" doc:id="f167bb81-b129-4075-a775-c7071d9d8013" type="APP:DOESNOT_EXIST" description="Restaurant Doen't Exist" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="d0fa9140-3ae4-4d0f-9180-fd0e4742ad78" >
+					<ee:message />
+					<ee:variables >
+						<ee:set-variable variableName="restaurant" ><![CDATA[%dw 2.0
+output application/java
+
+var restaurant =payload[0]
+---
+{
+	name:  if(vars.originalPayload.name != null) vars.originalPayload.name else  restaurant.name,
+	house_number: if(vars.originalPayload.address.houseNumber != null) vars.originalPayload.address.houseNumber else  restaurant.house_number,
+	street: if(vars.originalPayload.address.street != null) vars.originalPayload.address.street else  restaurant.street,
+	city: if(vars.originalPayload.address.city != null) vars.originalPayload.address.city else  restaurant.city,
+	pincode: if(vars.originalPayload.address.pincode != null) vars.originalPayload.address.pincode else  restaurant.pincode
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<db:update doc:name="Update" doc:id="6cf9778c-3a22-4232-9e7e-b138abf174e7" config-ref="Database_Config" >
+					<db:sql ><![CDATA[update restaurant set name= :name , house_number= :house_number,street = :street,city= :city,pincode=:pincode
+where restaurant_id = :id]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	id: vars.id,
+	name: vars.restaurant.name,
+	house_number: vars.restaurant.house_number,
+	street: vars.restaurant.street,
+	city: vars.restaurant.city,
+	pincode: vars.restaurant.pincode
+}]]]></db:input-parameters>
+				</db:update>
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>

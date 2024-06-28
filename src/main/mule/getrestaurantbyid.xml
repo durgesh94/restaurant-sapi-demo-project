@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getrestaurantbyidFlow" doc:id="2952209f-f3fb-43d8-94e1-c2391c46e37b" >
+		<db:select doc:name="Select" doc:id="a4a097a8-7fa0-4d56-8c9f-f600aa7a1a02" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from restaurant where restaurant_id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.restaurant_id
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="6a057ae9-3663-4d83-b0ee-5aab3a54bf6e" >
+			<when expression="#[sizeOf(payload)==0]">
+				<raise-error doc:name="Raise error" doc:id="410ab89f-b75a-4122-b95c-92d2d33acab5" type="APP:DOESNOT_EXIST" description="Restaurant with given id doesn' t exist"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[payload[0]]" doc:name="Set Payload" doc:id="f2774f9d-605d-4871-814b-739dc459cfb9" />
+				<ee:transform doc:name="Transform Message" doc:id="f8ce9e36-3823-42db-ac0c-89b2b7fbe9d2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var item= payload
+---
+
+{
+	  "restaurantId": item.restaurant_id,
+	  "name": item.name,
+	  "address": {
+	    "houseNumber": item.house_number,
+	    "street": item.street,
+	    "city": item.city,
+	    "pincode": item.pincode
+	  }
+	}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

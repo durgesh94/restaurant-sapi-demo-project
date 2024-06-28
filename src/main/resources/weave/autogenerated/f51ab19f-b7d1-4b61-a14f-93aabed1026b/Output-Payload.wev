@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_f51ab19f_b7d1_4b61_a14f_93aabed1026b_Output_Payload = {
+  menuName: String, 
+  _?: Any
+}
+

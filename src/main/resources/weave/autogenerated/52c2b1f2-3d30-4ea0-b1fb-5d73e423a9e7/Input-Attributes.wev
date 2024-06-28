@@ -1,0 +1,23 @@
+%dw 2.0
+
+type auto_52c2b1f2_3d30_4ea0_b1fb_5d73e423a9e7_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {|  |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {| restaurant_id: String |}, 
+  version: String, 
+  localAddress: String
+|}
+
