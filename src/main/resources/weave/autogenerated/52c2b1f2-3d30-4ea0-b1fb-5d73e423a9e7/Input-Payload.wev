@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_52c2b1f2_3d30_4ea0_b1fb_5d73e423a9e7_Input_Payload = {
+  menuName: String, 
+  _?: Any
+}
+

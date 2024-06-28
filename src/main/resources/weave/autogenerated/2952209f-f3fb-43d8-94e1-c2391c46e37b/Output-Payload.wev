@@ -1,0 +1,16 @@
+%dw 2.0
+
+type auto_2952209f_f3fb_43d8_94e1_c2391c46e37b_Output_Payload = {
+  address: {
+    pincode: Number, 
+    city: String, 
+    street: String, 
+    houseNumber: String, 
+    _?: Any
+  }, 
+  name: String, 
+  links: Array<{    name: String,     url: String,     _?: Any  }>, 
+  restaurantId: Number, 
+  _?: Any
+}
+

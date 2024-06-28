@@ -13,7 +13,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<app.runtime>4.7.0</app.runtime>
+		<app.runtime>4.6.1</app.runtime>
 		<mule.maven.plugin.version>4.2.0</mule.maven.plugin.version>
 	</properties>
 
@@ -30,6 +30,7 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
+					<classifier>mule-application</classifier>
 					<sharedLibraries>
 						<sharedLibrary>
 							<groupId>mysql</groupId>
@@ -74,7 +75,7 @@
 		<dependency>
 			<groupId>3a142d07-696d-4cc9-aa14-d3b89d6fdc56</groupId>
 			<artifactId>restuarant-demo-project</artifactId>
-			<version>1.0.3</version>
+			<version>1.0.7</version>
 			<classifier>raml</classifier>
 			<type>zip</type>
 		</dependency>
